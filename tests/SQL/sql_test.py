@@ -6,8 +6,9 @@ from core.models.assignments import Assignment, AssignmentStateEnum, GradeEnum
 
 
 class TestSQL:
-
-    def create_n_graded_assignments_for_teacher_and_student(self, number: int = 0, teacher_id: int = 1, student_id: int = 1) -> int:
+    def create_n_graded_assignments_for_teacher_and_student(
+        self, number: int = 0, teacher_id: int = 1, student_id: int = 1
+    ) -> int:
         """
         Creates 'n' graded assignments for a specified teacher and returns the count of assignments with grade 'A'.
 
@@ -20,8 +21,7 @@ class TestSQL:
         """
         # Count the existing assignments with grade 'A' for the specified teacher
         grade_a_counter: int = Assignment.filter(
-            Assignment.teacher_id == teacher_id,
-            Assignment.grade == GradeEnum.A
+            Assignment.teacher_id == teacher_id, Assignment.grade == GradeEnum.A
         ).count()
 
         # Create 'n' graded assignments
@@ -34,8 +34,8 @@ class TestSQL:
                 teacher_id=teacher_id,
                 student_id=student_id,
                 grade=grade,
-                content='test content',
-                state=AssignmentStateEnum.GRADED
+                content="test content",
+                state=AssignmentStateEnum.GRADED,
             )
 
             # Add the assignment to the database session
@@ -55,7 +55,7 @@ class TestSQL:
 
         # Create 25 graded assignments for student 1
         self.create_n_graded_assignments_for_teacher_and_student(25, student_id=1)
-        
+
         # Create 20 graded assignments for student 1
         self.create_n_graded_assignments_for_teacher_and_student(20, student_id=2)
 
@@ -64,12 +64,13 @@ class TestSQL:
         for grade in list(GradeEnum):
             grade_count: int = Assignment.filter(
                 Assignment.grade == grade,
-                Assignment.state == AssignmentStateEnum.GRADED
+                Assignment.state == AssignmentStateEnum.GRADED,
             ).count()
             expected_result.append((grade.value, grade_count))
-
         # Execute the SQL query and compare the result with the expected result
-        with open('tests/SQL/count_assignments_in_each_grade.sql', encoding='utf8') as fo:
+        with open(
+            "tests/SQL/count_assignments_in_each_grade.sql", encoding="utf8"
+        ) as fo:
             sql = fo.read()
 
         # Execute the SQL query compare the result with the expected result
@@ -81,18 +82,23 @@ class TestSQL:
         """Test to get count of grade A assignments for teacher which has graded maximum assignments"""
 
         # Read the SQL query from a file
-        with open('tests/SQL/count_grade_A_assignments_by_teacher_with_max_grading.sql', encoding='utf8') as fo:
+        with open(
+            "tests/SQL/count_grade_A_assignments_by_teacher_with_max_grading.sql",
+            encoding="utf8",
+        ) as fo:
             sql = fo.read()
 
         # Create and grade 5 assignments for the default teacher (teacher_id=1)
         grade_a_count_1 = self.create_n_graded_assignments_for_teacher_and_student(5)
-        
+
         # Execute the SQL query and check if the count matches the created assignments
         sql_result = db.session.execute(text(sql)).fetchall()
         assert grade_a_count_1 == sql_result[0][0]
 
         # Create and grade 10 assignments for a different teacher (teacher_id=2)
-        grade_a_count_2 = self.create_n_graded_assignments_for_teacher_and_student(10, 2)
+        grade_a_count_2 = self.create_n_graded_assignments_for_teacher_and_student(
+            10, 2
+        )
 
         # Execute the SQL query again and check if the count matches the newly created assignments
         sql_result = db.session.execute(text(sql)).fetchall()
